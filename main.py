@@ -9,7 +9,6 @@ from tkinter import filedialog
 import os
 import threading
 
-
 #pyinstaller --onefile --windowed --add-data "C:\\Users\\yoyok\\AppData\\Local\\Programs\\Python\\Python38\\Lib\\site-packages\\mediapipe\\modules\\pose_landmark\\pose_landmark_cpu.binarypb;mediapipe/modules/pose_landmark" main.py
 
 #多線程 嘗試方法一 把global改self 失敗
@@ -26,6 +25,10 @@ class Main():
         self.Rshoulder_list = []
         self.Rbody_list = []
         self.Rknee_list = []
+        self.Lelbow_list = []
+        self.Lshoulder_list = []
+        self.Lbody_list = []
+        self.Lknee_list = []
         #fps
         self.pTime=0
         #RL
@@ -35,10 +38,14 @@ class Main():
         plt.style.use('bmh')
         plt.xlabel('Time (s)')
         plt.ylabel('Angle (degrees)')
-        plt.plot(self.Relbow_list,'b',label='elbow')
-        plt.plot(self.Rshoulder_list,'g',label='shoulder')
-        plt.plot(self.Rbody_list,'r',label='body')
-        plt.plot(self.Rknee_list,'y',label='knee')
+        plt.plot(self.Relbow_list,'b',label='Relbow')
+        plt.plot(self.Rshoulder_list,'g',label='Rshoulder')
+        plt.plot(self.Rbody_list,'r',label='Rbody')
+        plt.plot(self.Rknee_list,'y',label='Rknee')
+        plt.plot(self.Lelbow_list,'c',label='Lelbow')
+        plt.plot(self.Lshoulder_list,'k',label='Lshoulder')
+        plt.plot(self.Lbody_list,'m',label='Lbody')
+        plt.plot(self.Lknee_list,'w',label='Lknee')
         plt.legend(loc='lower left')
         #Tk
         self.window = tk.Tk()
@@ -57,19 +64,16 @@ class Main():
         start_button.grid(column=0, row=3,pady=20)
         stop_button.grid(column=1, row=3)
         
-        # one_motion_record=tk.Button(self.window,text="one",command=lambda: rc(self,"one"),width=10)
-        # one_motion_record.grid(column=0, row=4)
-        # two_motion_record=tk.Button(self.window,text="two",command=lambda: rc(self,"two"),width=10)
-        # two_motion_record.grid(column=1, row=4)
-        # # record_motion_record=tk.Button(self.window,text="record",command=lambda: rc(self,"record"),width=10)
-        # # record_motion_record.grid(column=0, row=5)
-
     #record_list
     def reset(self):
         self.Relbow_list = []
         self.Rshoulder_list = []
         self.Rbody_list = []
         self.Rknee_list = []
+        self.Lelbow_list = []
+        self.Lshoulder_list = []
+        self.Lbody_list = []
+        self.Lknee_list = []
     
     #fps
     def fps_show(self):
@@ -110,12 +114,16 @@ class Main():
         self.time_points.append(time_elapsed)
     
         # 清空舊的圖表，重新繪製
-        if self.RL == "R":
-            plt.plot(self.time_points, self.Relbow_list, 'b')
-            plt.plot(self.time_points, self.Rshoulder_list, 'g')
-            plt.plot(self.time_points, self.Rbody_list, 'r')
-            plt.plot(self.time_points, self.Rknee_list, 'y')
-            plt.legend(loc='lower left')
+        plt.plot(self.time_points, self.Relbow_list, 'b')
+        plt.plot(self.time_points, self.Rshoulder_list, 'g')
+        plt.plot(self.time_points, self.Rbody_list, 'r')
+        plt.plot(self.time_points, self.Rknee_list, 'y')
+        plt.plot(self.time_points, self.Lelbow_list, 'b')
+        plt.plot(self.time_points, self.Lshoulder_list, 'g')
+        plt.plot(self.time_points, self.Lbody_list, 'r')
+        plt.plot(self.time_points, self.Lknee_list, 'y')
+            
+        plt.legend(loc='lower left')
         plt.pause(0.01)
 
     def new_plt(self):
@@ -125,14 +133,18 @@ class Main():
         plt.xlabel('Time (s)')
         plt.ylabel('Angle (degrees)')
         plt.legend(loc='lower left')
-        plt.plot(self.Relbow_list,'b',label='elbow')
-        plt.plot(self.Rshoulder_list,'g',label='shoulder')
-        plt.plot(self.Rbody_list,'r',label='body')
-        plt.plot(self.Rknee_list,'y',label='knee')
+        plt.plot(self.Relbow_list,'b',label='Relbow')
+        plt.plot(self.Rshoulder_list,'g',label='Rshoulder')
+        plt.plot(self.Rbody_list,'r',label='Rbody')
+        plt.plot(self.Rknee_list,'y',label='Rknee')
+        plt.plot(self.Lelbow_list,'b',label='Lelbow')
+        plt.plot(self.Lshoulder_list,'g',label='Lshoulder')
+        plt.plot(self.Lbody_list,'r',label='Lbody')
+        plt.plot(self.Lknee_list,'y',label='Lknee')
         self.time_points=[]
         plt.show()
 
-    def R_angle(self,list_name,a,b,c):
+    def angle(self,list_name,a,b,c):
         x1, y1 = int(self.lms.landmark[a].x * self.imgW), int(self.lms.landmark[a].y * self.imgH)
         x2, y2 = int(self.lms.landmark[b].x * self.imgW), int(self.lms.landmark[b].y * self.imgH)
         x3, y3 = int(self.lms.landmark[c].x * self.imgW), int(self.lms.landmark[c].y * self.imgH)
@@ -165,10 +177,15 @@ class Main():
                         self.lms = results.pose_landmarks
 
                     # 計算角度
-                    self.R_angle(self.Relbow_list, 12, 14, 16)
-                    self.R_angle(self.Rshoulder_list, 14, 12, 24)
-                    self.R_angle(self.Rbody_list, 12, 24, 26)
-                    self.R_angle(self.Rknee_list, 24, 26, 28)
+                    self.angle(self.Relbow_list, 12, 14, 16)
+                    self.angle(self.Rshoulder_list, 14, 12, 24)
+                    self.angle(self.Rbody_list, 12, 24, 26)
+                    self.angle(self.Rknee_list, 24, 26, 28)
+                
+                    self.angle(self.Lelbow_list, 11, 13, 15)
+                    self.angle(self.Lshoulder_list, 13, 11, 23)
+                    self.angle(self.Lbody_list, 11, 23, 25)
+                    self.angle(self.Lknee_list, 23, 25, 27)
 
                     # 繪製 FPS 和更新繪圖
                     self.fps_show()
@@ -180,7 +197,6 @@ class Main():
                 time_elapsed += 1 / fps  # 增加時間（每一幀時間）
             else:
                 break
-
             cv2.waitKey(10)
         self.cap.release()
         cv2.destroyAllWindows()
@@ -196,9 +212,8 @@ class Main():
         if not self.first_plt and self.cap:
             self.new_plt()
         self.first_plt = False
-                
     
-    
+
     def run(self):
         self.window.mainloop()
         
